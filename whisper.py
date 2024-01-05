@@ -34,7 +34,9 @@ def recognize(path=None):
     array = librosa.resample(float_data, orig_sr=sampling_rate, target_sr=TARGET_SAMPLING_RATE)
     # print(array.shape)
     input_features = processor(array, sampling_rate=TARGET_SAMPLING_RATE, return_tensors="pt").input_features
+    print(input_features.shape)
     predicted_ids = model.generate(input_features.to(device))
+    print(predicted_ids.shape)
     # print(processor.batch_decode(predicted_ids, skip_special_tokens=True))
     # ds = Dataset.from_dict({"audio": [path]}).cast_column("audio", Audio(sampling_rate=TARGET_SAMPLING_RATE))
     # sample = ds["audio"][0]
