@@ -5,6 +5,7 @@ import time
 from tqdm import tqdm
 import numpy as np
 from random import choices
+import matplotlib.pyplot as plt
 from datasets import load_dataset
 from transformers import AutoTokenizer, pipeline
 from trl import PPOTrainer, PPOConfig, AutoModelForCausalLMWithValueHead, create_reference_model
@@ -14,7 +15,7 @@ tqdm.pandas()
 sentiment_pipe_kwargs = {"top_k": None, "function_to_apply": "none"}
 
 config = PPOConfig(
-    model_name="lvwerra/gpt2-imdb", steps=51200, learning_rate=1.41e-5, remove_unused_columns=False,
+    model_name="gpt2", steps=51200, learning_rate=1.41e-5, remove_unused_columns=False,
     log_with="tensorboard", batch_size=8, ratio_threshold=100, project_kwargs={"logging_dir": "logs"}
 )
 
@@ -122,7 +123,7 @@ generation_kwargs = {
     "min_length": -1,
     "top_k": 0.0,
     "top_p": 1.0,
-    "do_sample": True,
+    "do_sample": False,
     "pad_token_id": gpt2_tokenizer.eos_token_id,
     "max_new_tokens": txt_out_len,
     "eos_token_id": -1,
@@ -163,14 +164,10 @@ for epoch in range(2):
         texts = [q + r for q, r in zip(batch["query"], game_data["response"])]
         logits = extract_pipe_output(sentiment_pipe(texts, **sentiment_pipe_kwargs))
         rewards = pos_logit_to_reward(logits, task_list)
-        print("rewards", rewards)
-        print("query_tensors", query_tensors)
-        print("response_tensors", response_tensors)
-        # print(rewards.shape)
+
         # Run PPO training
         t = time.time()
         stats = ppo_trainer.step(query_tensors, response_tensors, rewards)
-        break
 
         # print(stats)
         for cs in ctrl_str:
@@ -180,7 +177,7 @@ for epoch in range(2):
 
         # print(logs)
 
-# test()
-#
-# gpt2_model.save_pretrained("gpt2-imdb-ctrl")
-# gpt2_tokenizer.save_pretrained("gpt2-imdb-ctrl")
+test()
+
+gpt2_model.save_pretrained("gpt2-imdb-ctrl")
+gpt2_tokenizer.save_pretrained("gpt2-imdb-ctrl")

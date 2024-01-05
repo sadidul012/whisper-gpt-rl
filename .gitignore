@@ -5,3 +5,5 @@ whisper-small-peft
 **/wandb
 audio
 dataset
+**/logs
+gpt2-imdb-ctrl
